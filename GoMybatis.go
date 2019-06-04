@@ -402,7 +402,7 @@ func exeMethodByXml(elementType ElementType, beanName string, sessionEngine Sess
 			return err
 		}
 		if haveLastReturnValue {
-			returnValue.Elem().SetInt(res.RowsAffected)
+			returnValue.Elem().SetInt(res.LastInsertId)
 		}
 	}
 	return nil
@@ -502,7 +502,7 @@ func scanStructArgFields(v reflect.Value, tag *TagArg) map[string]interface{} {
 			structArg[typeValue.Name] = obj
 		}
 	}
-	if tag != nil && parameters[tag.Name]==nil{
+	if tag != nil && parameters[tag.Name] == nil {
 		parameters[tag.Name] = structArg
 	}
 	return parameters

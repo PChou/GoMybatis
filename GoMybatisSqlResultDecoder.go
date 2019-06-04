@@ -44,12 +44,28 @@ func (it GoMybatisSqlResultDecoder) Decode(resultMap map[string]*ResultProperty,
 	return nil
 }
 
+func (it GoMybatisSqlResultDecoder) findColumnByProperty(resultMap map[string]*ResultProperty, propertyName string) *ResultProperty {
+	for _, rp := range resultMap {
+		if rp.Property == propertyName {
+			return rp
+		}
+	}
+	return nil
+}
+
 func (it GoMybatisSqlResultDecoder) sqlStructConvert(resultMap map[string]*ResultProperty, resultTItemType reflect.Type, sItemMap map[string][]byte) reflect.Value {
 	if resultTItemType.Kind() == reflect.Struct {
 		var tItemTypeFieldTypeValue = reflect.New(resultTItemType)
 		for i := 0; i < resultTItemType.NumField(); i++ {
 			var tItemTypeFieldType = resultTItemType.Field(i)
-			var jsonTag = tItemTypeFieldType.Tag.Get("json")
+			// 首先尝试用 resultMap
+			var jsonTag string
+			matchedResultProperty := it.findColumnByProperty(resultMap, tItemTypeFieldType.Name)
+			if matchedResultProperty != nil {
+				jsonTag = matchedResultProperty.Column
+			} else {
+				jsonTag = tItemTypeFieldType.Tag.Get("json")
+			}
 			var repleaceName = tItemTypeFieldType.Name
 
 			if tItemTypeFieldType.Type.Kind() != reflect.Ptr {
@@ -134,7 +150,7 @@ func (it GoMybatisSqlResultDecoder) sqlBasicTypeConvert(clomnName string, result
 			el = resultValue.Elem()
 		}
 		resultValue = &el
-		return it.sqlBasicTypeConvert(clomnName,resultMap,tItemTypeFieldType,valueByte,resultValue)
+		return it.sqlBasicTypeConvert(clomnName, resultMap, tItemTypeFieldType, valueByte, resultValue)
 	}
 	if tItemTypeFieldType.Kind() == reflect.String {
 		return it.basicTypeConvert(tItemTypeFieldType, valueByte, resultValue)
