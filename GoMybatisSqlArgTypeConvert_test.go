@@ -29,6 +29,16 @@ func Test_SqlArgTypeConvert(t *testing.T) {
 		t.Fatal(`Test_Adapter fail convertResult != string`)
 	}
 	fmt.Println(convertResult)
+	convertResult = GoMybatisSqlArgTypeConvert{}.Convert("^[a-zA-Z]{3} [a-zA-Z]{3} \\d{2}\\d{2}:\\d{2}:\\d{2} \\d{4}")
+	if convertResult != `'^[a-zA-Z]{3} [a-zA-Z]{3} \\d{2}\\d{2}:\\d{2}:\\d{2} \\d{4}'` {
+		t.Fatal(`Test_Adapter fail convertResult != '^[a-zA-Z]{3} [a-zA-Z]{3} \\d{2}\\d{2}:\\d{2}:\\d{2} \\d{4}'`)
+	}
+	fmt.Println(convertResult)
+	convertResult = GoMybatisSqlArgTypeConvert{}.Convert("\"/home/data/alert_ods_new.log\"")
+	if convertResult != `'\"/home/data/alert_ods_new.log\"'` {
+		t.Fatal(`Test_Adapter fail convertResult != '\"/home/data/alert_ods_new.log\"'`)
+	}
+	fmt.Println(convertResult)
 }
 
 func Test_SqlArgTypeConvert_NoType(t *testing.T) {

@@ -21,7 +21,8 @@ func (it GoMybatisSqlArgTypeConvert) Convert(argValue interface{}) string {
 	case string:
 		var argStr bytes.Buffer
 		argStr.WriteString(`'`)
-		argStr.WriteString(argValue.(string))
+		it.escapeStringBackslash(&argStr, argValue.(string))
+		//argStr.WriteString(argValue.(string))
 		argStr.WriteString(`'`)
 		return argStr.String()
 	case *string:
@@ -31,7 +32,8 @@ func (it GoMybatisSqlArgTypeConvert) Convert(argValue interface{}) string {
 		}
 		var argStr bytes.Buffer
 		argStr.WriteString(`'`)
-		argStr.WriteString(*v)
+		it.escapeStringBackslash(&argStr, *v)
+		//argStr.WriteString(*v)
 		argStr.WriteString(`'`)
 		return argStr.String()
 	case bool:
@@ -115,4 +117,35 @@ func (it GoMybatisSqlArgTypeConvert) toString(argValue interface{}) string {
 		return ""
 	}
 	return fmt.Sprint(argValue)
+}
+
+func (it GoMybatisSqlArgTypeConvert) escapeStringBackslash(buf *bytes.Buffer, v string) {
+	for i := 0; i < len(v); i++ {
+		c := v[i]
+		switch c {
+		case '\x00':
+			buf.WriteByte('\\')
+			buf.WriteByte('0')
+		case '\n':
+			buf.WriteByte('\\')
+			buf.WriteByte('n')
+		case '\r':
+			buf.WriteByte('\\')
+			buf.WriteByte('r')
+		case '\x1a':
+			buf.WriteByte('\\')
+			buf.WriteByte('z')
+		case '\'':
+			buf.WriteByte('\\')
+			buf.WriteByte('\'')
+		case '"':
+			buf.WriteByte('\\')
+			buf.WriteByte('"')
+		case '\\':
+			buf.WriteByte('\\')
+			buf.WriteByte('\\')
+		default:
+			buf.WriteByte(c)
+		}
+	}
 }
